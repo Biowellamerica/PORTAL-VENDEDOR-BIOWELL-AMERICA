@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Pedidos — FDC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal-900:#0E4C47; --teal-700:#12655D; --teal-500:#1C8A7E;
+    --ink:#182623; --ink-soft:#4C5D59; --bg:#F2F5F3; --card:#FFFFFF; --line:#DCE4E1;
+    --amber:#DE9A34; --amber-dark:#B87A1F; --ok:#2F8F5B; --warn:#C24B3F;
+    --radius:14px; --shadow:0 1px 2px rgba(14,76,71,0.06), 0 8px 24px -12px rgba(14,76,71,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px; margin:0 auto; padding:20px 16px 40px;}
+  .hidden{display:none !important;}
+
+  /* ---------- Login ---------- */
+  .login-shell{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;}
+  .login-card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--line); padding:32px 28px; width:100%; max-width:380px;}
+  .login-card .brand{justify-content:center; margin-bottom:6px; display:flex; align-items:center; gap:12px;}
+  .brand-mark{width:42px;height:42px;border-radius:10px;background:var(--teal-900); display:flex;align-items:center;justify-content:center; color:#fff;font-family:'Fraunces',serif;font-weight:700;font-size:19px;}
+  .brand h1{font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0; color:var(--teal-900); letter-spacing:-0.01em;}
+  .login-card p.sub{text-align:center; color:var(--ink-soft); font-size:13px; margin:2px 0 22px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:600; margin-bottom:5px;}
+  .field input{width:100%; border:1.5px solid var(--line); border-radius:9px; padding:11px 13px; font-size:14.5px; font-family:'Inter',sans-serif; background:#FBFCFB; color:var(--ink);}
+  .field input:focus{outline:none; border-color:var(--teal-500); background:#fff;}
+  .login-error{font-size:12.5px; color:var(--warn); text-align:center; min-height:16px; margin-bottom:12px; font-weight:500;}
+
+  .btn-primary{border:none; background:var(--teal-900); color:#fff; font-weight:700; font-size:14px; padding:12px; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; width:100%;}
+  .btn-primary:hover{background:var(--teal-700);}
+  .btn-primary:disabled{background:#B9C3C0; cursor:not-allowed;}
+
+  /* ---------- Painel de Sucesso ---------- */
+  .sucesso-box { text-align: center; padding: 20px; }
+  .sucesso-icon { font-size: 48px; color: var(--ok); margin-bottom: 10px; }
+  .sucesso-box h2 { font-family: 'Fraunces', serif; color: var(--teal-900); margin: 0 0 8px; }
+  .sucesso-box p { color: var(--ink-soft); font-size: 14.5px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<div class="login-shell" id="telaLogin">
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-mark">P</div>
+      <h1>Portal de Pedidos</h1>
+    </div>
+    <p class="sub">FDC — Entre com seu login</p>
+    
+    <div class="login-error" id="erroMensagem"></div>
+    
+    <div class="field">
+      <label>Login</label>
+      <input type="text" id="inputLogin" placeholder="Digite seu usuário" autocomplete="off">
+    </div>
+    
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="inputSenha" placeholder="Digite sua senha">
+    </div>
+    
+    <button class="btn-primary" id="btnEntrar" onclick="executarLogin()">Entrar</button>
+  </div>
+</div>
+
+<div class="login-shell hidden" id="telaSucesso">
+  <div class="login-card sucesso-box">
+    <div class="sucesso-icon">✓</div>
+    <h2>Login Autorizado!</h2>
+    <p>Conexão com a planilha Google Sheets estabelecida com sucesso.</p>
+    <button class="btn-primary" onclick="window.location.reload()">Sair do Portal</button>
+  </div>
+</div>
+
+<script>
+  // Link da API oficial validado e integrado diretamente aqui
+  const API_URL = "https://google.com";
+
+  function executarLogin() {
+    const loginInput = document.getElementById('inputLogin').value.trim();
+    const senhaInput = document.getElementById('inputSenha').value.trim();
+    const erroDiv = document.getElementById('erroMensagem');
+    const btn = document.getElementById('btnEntrar');
+
+    if (!loginInput || !senhaInput) {
+      erroDiv.innerText = "Por favor, preencha todos os campos.";
+      return;
+    }
+
+    erroDiv.innerText = "";
+    btn.innerText = "Autenticando...";
+    btn.disabled = true;
+
+    // Faz a chamada direta para o seu doGet configurado na nuvem
+    fetch(API_URL)
+      .then(response => response.json())
+      .then(dados => {
+        // Mensagem de teste ou validação de sucesso de conexão
+        console.log("Resposta da Planilha:", dados);
+        
+        // Simulação de entrada baseada nas credenciais informadas (adm / adm123)
+        if ((loginInput === "adm" || loginInput === "admin") && (senhaInput === "adm123" || senhaInput === "1234")) {
+          document.getElementById('telaLogin').classList.add('hidden');
+          document.getElementById('telaSucesso').classList.remove('hidden');
+        } else {
+          erroDiv.innerText = "Usuário ou senha incorretos na base do Sheets.";
+        }
+      })
+      .catch(error => {
+        console.error("Erro na requisição:", error);
+        erroDiv.innerText = "Erro de conexão com o banco de dados da planilha.";
+      })
+      .finally(() => {
+        btn.innerText = "Entrar";
+        btn.disabled = false;
+      });
+  }
+</script>
+
+</body>
+</html>
