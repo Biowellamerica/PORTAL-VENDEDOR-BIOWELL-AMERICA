@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Pedidos — FDC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal-900:#0E4C47; --teal-700:#12655D; --teal-500:#1C8A7E;
+    --ink:#182623; --ink-soft:#4C5D59; --bg:#F2F5F3; --card:#FFFFFF; --line:#DCE4E1;
+    --amber:#DE9A34; --amber-dark:#B87A1F; --ok:#2F8F5B; --warn:#C24B3F;
+    --radius:14px; --shadow:0 1px 2px rgba(14,76,71,0.06), 0 8px 24px -12px rgba(14,76,71,0.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; padding-bottom:84px;}
+  .wrap{max-width:1180px; margin:0 auto; padding:20px 16px 40px;}
+  .hidden{display:none !important;}
+
+  /* ---------- Topbar comum ---------- */
+  .topbar{display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:22px; padding-bottom:18px; border-bottom:2px solid var(--teal-900);}
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-mark{width:42px;height:42px;border-radius:10px;background:var(--teal-900); display:flex;align-items:center;justify-content:center; color:#fff;font-family:'Fraunces',serif;font-weight:700;font-size:19px;}
+  .brand h1{font-family:'Fraunces',serif; font-weight:600; font-size:22px; margin:0; color:var(--teal-900); letter-spacing:-0.01em;}
+  .brand p{margin:2px 0 0; font-size:13px; color:var(--ink-soft);}
+  .topbar-right{display:flex; align-items:center; gap:12px;}
+  .user-chip{font-size:13px; color:var(--ink-soft);}
+  .user-chip b{color:var(--teal-900);}
+  .btn-logout{border:1.5px solid var(--line); background:#fff; color:var(--ink-soft); font-size:12.5px; font-weight:600; padding:7px 12px; border-radius:8px; cursor:pointer; font-family:'Inter',sans-serif;}
+  .btn-logout:hover{border-color:var(--warn); color:var(--warn);}
+
+  /* ---------- Login ---------- */
+  .login-shell{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;}
+  .login-card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--line); padding:32px 28px; width:100%; max-width:380px;}
+  .login-card .brand{justify-content:center; margin-bottom:6px;}
+  .login-card p.sub{text-align:center; color:var(--ink-soft); font-size:13px; margin:2px 0 22px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:600; margin-bottom:5px;}
+  .field input{width:100%; border:1.5px solid var(--line); border-radius:9px; padding:11px 13px; font-size:14.5px; font-family:'Inter',sans-serif; background:#FBFCFB; color:var(--ink);}
+  .field input:focus{outline:none; border-color:var(--teal-500); background:#fff;}
+  .login-error{font-size:12.5px; color:var(--warn); text-align:center; min-height:16px; margin-bottom:8px;}
+
+  /* ---------- Botões genéricos ---------- */
+  .btn-primary{border:none; background:var(--teal-900); color:#fff; font-weight:700; font-size:14px; padding:12px; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; width:100%;}
+  .btn-primary:hover{background:var(--teal-700);}
+  .btn-primary:disabled{background:#B9C3C0; cursor:not-allowed;}
+  .btn-secondary{border:1.5px solid var(--line); background:#fff; color:var(--ink); font-weight:600; font-size:13px; padding:10px; border-radius:10px; cursor:pointer; font-family:'Inter',sans-serif;}
+  .btn-secondary:hover{border-color:var(--teal-500); color:var(--teal-700);}
+  .btn-mini{border:none; background:var(--teal-900); color:#fff; padding:7px 12px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif;}
+  .btn-mini.ghost{background:none; border:1.5px solid var(--teal-700); color:var(--teal-700);}
+
+  /* ---------- Home ---------- */
+  .home-hero{margin:30px 0 24px;}
+  .home-hero h2{font-family:'Fraunces',serif; font-size:26px; color:var(--teal-900); margin:0 0 4px;}
+  .home-hero p{color:var(--ink-soft); font-size:14px; margin:0;}
+  .home-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px;}
+  .home-card{background:var(--card); border:1.5px solid var(--line); border-radius:var(--radius); padding:22px; cursor:pointer; box-shadow:var(--shadow); transition:border-color .12s, transform .12s;}
+  .home-card:hover{border-color:var(--teal-500); transform:translateY(-2px);}
+  .home-card .hc-icon{font-size:26px; margin-bottom:10px;}
+  .home-card h3{font-family:'Fraunces',serif; font-size:17px; margin:0 0 4px; color:var(--teal-900);}
+  .home-card p{font-size:12.5px; color:var(--ink-soft); margin:0;}
+  .home-card.primary{background:var(--teal-900); border-color:var(--teal-900);}
+  .home-card.primary h3, .home-card.primary p{color:#fff;}
+  .home-card.primary p{opacity:.85;}
+
+  /* ---------- Layout pedido (reaproveitado) ---------- */
+  .layout{display:grid; grid-template-columns:1.35fr 1fr; gap:20px; align-items:start;}
+  @media (max-width:960px){ .layout{grid-template-columns:1fr;} }
+  .card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-bottom:20px; border:1px solid var(--line);}
+  .step-head{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .step-num{width:26px;height:26px;border-radius:50%;background:var(--teal-900);color:#fff; display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0; font-family:'IBM Plex Mono',monospace;}
+  .step-head h2{font-family:'Fraunces',serif; font-size:18px; font-weight:600; margin:0; color:var(--teal-900);}
+  .step-head span.sub{font-size:12.5px; color:var(--ink-soft); display:block; margin-top:1px;}
+  input.search{width:100%; padding:11px 14px; border-radius:10px; border:1.5px solid var(--line); font-size:14.5px; font-family:'Inter',sans-serif; background:#FBFCFB; color:var(--ink);}
+  input.search:focus{outline:none; border-color:var(--teal-500); background:#fff;}
+  .results{margin-top:10px; display:flex; flex-direction:column; gap:8px; max-height:340px; overflow-y:auto;}
+  .product-list{max-height:460px;}
+  .hint{font-size:12.5px; color:var(--ink-soft); margin-top:8px;}
+  .product-row{display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:10px; padding:10px 13px; background:#fff;}
+  .product-row.checked{border-color:var(--teal-500); background:#F5FAF9;}
+  .product-row input[type=checkbox]{width:19px; height:19px; accent-color:var(--teal-700); flex-shrink:0; cursor:pointer;}
+  .product-row .pr-info{flex:1; min-width:0;}
+  .product-row .pr-desc{font-weight:600; font-size:13.8px; color:var(--ink); line-height:1.3;}
+  .product-row .pr-meta{font-size:11.5px; color:var(--ink-soft); margin-top:3px; font-family:'IBM Plex Mono',monospace; display:flex; gap:10px; flex-wrap:wrap;}
+  .product-row .pr-price{color:var(--teal-900); font-weight:600;}
+  .badge-warn{color:var(--warn);}
+  .product-row .pr-qty{display:flex; align-items:center; gap:5px; flex-shrink:0;}
+  .product-row .pr-qty input{width:44px; text-align:center; border:1.5px solid var(--line); border-radius:8px; padding:5px 2px; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--ink);}
+  .client-card{border:1.5px solid var(--line); border-radius:10px; padding:11px 13px; display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; background:#fff;}
+  .client-card:hover{border-color:var(--teal-500); background:#F5FAF9;}
+  .ci-name{font-weight:600; font-size:14px; color:var(--ink);}
+  .ci-detail{font-size:12px; color:var(--ink-soft); margin-top:2px; font-family:'IBM Plex Mono',monospace;}
+  .chip{font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:20px; text-transform:uppercase; letter-spacing:.03em; white-space:nowrap;}
+  .chip-teal{background:#E4F2EF; color:var(--teal-700);}
+  .chip-tabela{background:#FCEFDD; color:var(--amber-dark);}
+  .selected-client-box{display:flex; align-items:center; justify-content:space-between; gap:12px; background:#EAF5F2; border:1.5px solid var(--teal-500); border-radius:10px; padding:13px 15px; margin-top:10px;}
+  .selected-client-box .ci-name{font-size:15px;}
+
+  .ticket{position:sticky; top:16px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--line); overflow:hidden;}
+  .ticket-head{background:var(--teal-900); color:#fff; padding:16px 18px; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.5) 0 2px, transparent 2px 5px, rgba(255,255,255,.5) 5px 7px, transparent 7px 11px); background-size:100% 4px; background-repeat:no-repeat; background-position:bottom; padding-bottom:20px;}
+  .ticket-head h2{font-family:'Fraunces',serif; font-size:19px; margin:0 0 2px; font-weight:600;}
+  .ticket-head .order-no{font-family:'IBM Plex Mono',monospace; font-size:12px; opacity:.85;}
+  .ticket-body{padding:16px 18px;}
+  .ticket-empty{font-size:13.5px; color:var(--ink-soft); text-align:center; padding:26px 10px;}
+  .ticket-client{font-size:12.5px; color:var(--ink-soft); border-bottom:1px dashed var(--line); padding-bottom:12px; margin-bottom:12px;}
+  .ticket-client b{color:var(--ink); font-size:13.5px;}
+  .item-row{display:flex; justify-content:space-between; align-items:flex-start; gap:8px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:13px;}
+  .item-row:last-child{border-bottom:none;}
+  .item-left{flex:1;}
+  .item-left .it-name{font-weight:600; color:var(--ink); font-size:13px; line-height:1.3;}
+  .item-left .it-code{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft);}
+  .qty-controls{display:flex; align-items:center; gap:6px; margin-top:5px;}
+  .qty-controls button{width:22px;height:22px;border-radius:6px;border:1px solid var(--line);background:#fff;cursor:pointer; font-size:13px; line-height:1; color:var(--ink);}
+  .qty-controls span{font-family:'IBM Plex Mono',monospace; font-size:13px; min-width:22px; text-align:center;}
+  .item-right{text-align:right; font-family:'IBM Plex Mono',monospace; flex-shrink:0;}
+  .item-right .it-subtotal{font-weight:600; color:var(--teal-900); font-size:13.5px;}
+  .remove-x{background:none; border:none; color:var(--warn); font-size:11px; cursor:pointer; margin-top:4px; font-family:'Inter',sans-serif; text-decoration:underline; padding:0;}
+  .ticket-total{display:flex; justify-content:space-between; align-items:baseline; margin-top:12px; padding-top:12px; border-top:2px solid var(--teal-900);}
+  .ticket-total .lbl{font-family:'Fraunces',serif; font-size:15px; font-weight:600; color:var(--teal-900);}
+  .ticket-total .val{font-family:'IBM Plex Mono',monospace; font-size:21px; font-weight:600; color:var(--teal-900);}
+  textarea.obs{width:100%; margin-top:12px; border:1.5px solid var(--line); border-radius:9px; padding:9px 11px; font-family:'Inter',sans-serif; font-size:12.5px; resize:vertical; min-height:46px; color:var(--ink);}
+  textarea.obs:focus{outline:none; border-color:var(--teal-500);}
+  .ticket-actions{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+  .send-row{display:flex; gap:8px; margin-top:12px;}
+  .btn-send{flex:1; border:none; border-radius:10px; padding:11px 8px; font-weight:700; font-size:13.5px; cursor:pointer; font-family:'Inter',sans-serif; display:flex; align-items:center; justify-content:center; gap:6px; color:#fff;}
+  .btn-send.whatsapp{background:#25A566;}
+  .btn-send.whatsapp:hover{background:#1E8A55;}
+  .btn-send.email{background:var(--teal-700);}
+  .btn-send.email:hover{background:var(--teal-900);}
+  .copied-msg{font-size:12px; color:var(--ok); text-align:center; font-weight:600; min-height:16px;}
+  .confirm-box{margin-top:14px; padding:14px; border:1.5px dashed var(--amber); border-radius:10px; background:#FCF6EB;}
+  .confirm-box p{font-size:12.5px; color:var(--ink-soft); margin:0 0 10px;}
+  .confirm-box .row{display:flex; gap:8px;}
+
+  .mobile-bar{display:none; position:fixed; bottom:0; left:0; right:0; background:var(--teal-900); color:#fff; padding:12px 18px; align-items:center; justify-content:space-between; z-index:50; box-shadow:0 -4px 16px rgba(0,0,0,.15);}
+  .mobile-bar .mb-info{font-size:13px;}
+  .mobile-bar .mb-total{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:16px;}
+  .mobile-bar button{background:var(--amber); border:none; color:#3A2600; font-weight:700; padding:8px 14px; border-radius:8px; font-size:12.5px; cursor:pointer;}
+  @media (max-width:960px){ .mobile-bar{display:flex;} .ticket{position:static;} }
+
+  /* ---------- Meus pedidos / Admin ---------- */
+  .filters-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+  .filters-row input, .filters-row select{border:1.5px solid var(--line); border-radius:9px; padding:9px 11px; font-size:13px; font-family:'Inter',sans-serif; background:#fff; color:var(--ink);}
+  .order-list{display:flex; flex-direction:column; gap:10px;}
+  .order-card{background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:14px 16px; cursor:pointer; box-shadow:var(--shadow);}
+  .order-card:hover{border-color:var(--teal-500);}
+  .order-card-top{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .order-id{font-family:'IBM Plex Mono',monospace; font-weight:700; color:var(--teal-900); font-size:13.5px;}
+  .order-status{font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:20px; text-transform:uppercase; background:#E4F2EF; color:var(--teal-700);}
+  .order-meta{font-size:12.5px; color:var(--ink-soft); margin-top:4px;}
+  .order-total{font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--teal-900); font-size:15px; margin-top:6px;}
+  .order-detail{display:none; margin-top:12px; padding-top:12px; border-top:1px dashed var(--line);}
+  .order-detail.open{display:block;}
+  .empty-state{text-align:center; padding:50px 20px; color:var(--ink-soft); font-size:13.5px;}
+
+  @media print{
+    .topbar .meta-fields, .card:not(.print-ticket), .mobile-bar, .ticket-actions, .send-row, .confirm-box, input.search, .hint{display:none !important;}
+    body{background:#fff; padding-bottom:0;}
+    .layout{display:block;}
+    .ticket{box-shadow:none; border:1px solid #ccc;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ======================= LOGIN ======================= -->
+<div id="screenLogin" class="login-shell">
+  <div class="login-card">
+    <div class="brand"><div class="brand-mark">P</div></div>
+    <p class="sub">Portal de Pedidos — entre com seu login</p>
+    <div class="field">
+      <label>Login</label>
+      <input type="text" id="loginUser" autocapitalize="off" autocomplete="username" placeholder="Ex: analamy">
+    </div>
+    <div class="field">
+      <label>Senha</label>
+      <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••">
+    </div>
+    <div class="login-error" id="loginError"></div>
+    <button class="btn-primary" id="btnLogin">Entrar</button>
+  </div>
+</div>
+
+<!-- ======================= HOME ======================= -->
+<div id="screenHome" class="hidden">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">P</div>
+        <div><h1>Portal de Pedidos</h1><p>FDC — Vendas</p></div>
+      </div>
+      <div class="topbar-right">
+        <span class="user-chip">Olá, <b id="homeUserName">—</b></span>
+        <button class="btn-logout" onclick="logout()">Sair</button>
+      </div>
+    </div>
+    <div class="home-hero">
+      <h2 id="homeGreeting">Olá!</h2>
+      <p>O que você quer fazer agora?</p>
+    </div>
+    <div class="home-grid">
+      <div class="home-card primary" onclick="goToNovoPedido()">
+        <div class="hc-icon">🧾</div>
+        <h3>+ Novo Pedido</h3>
+        <p>Selecionar cliente e montar um pedido</p>
+      </div>
+      <div class="home-card" onclick="goToMeusPedidos()">
+        <div class="hc-icon">📋</div>
+        <h3>Meus Pedidos</h3>
+        <p>Consultar pedidos já enviados</p>
+      </div>
+      <div class="home-card" id="cardAdmin" onclick="goToAdmin()" style="display:none;">
+        <div class="hc-icon">🛠️</div>
+        <h3>Administração</h3>
+        <p>Ver pedidos de todos os vendedores</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= NOVO PEDIDO ======================= -->
+<div id="screenPedido" class="hidden">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div style="cursor:pointer;" class="brand-mark" onclick="goHome()">←</div>
+        <div><h1>Novo Pedido</h1><p id="pedidoVendedorLabel">Representante</p></div>
+      </div>
+      <div class="topbar-right">
+        <span class="user-chip">Pedido em andamento</span>
+        <button class="btn-logout" onclick="goHome()">Voltar</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div>
+        <div class="card" id="stepClienteCard">
+          <div class="step-head">
+            <div class="step-num">1</div>
+            <div><h2>Cliente</h2><span class="sub">Busque na sua carteira por rede, código SAP ou CNPJ</span></div>
+          </div>
+          <input type="text" class="search" id="clientSearch" placeholder="Ex: Bezerra, C00273, ou CNPJ...">
+          <div class="results" id="clientResults"></div>
+          <div id="selectedClientBox"></div>
+        </div>
+
+        <div class="card">
+          <div class="step-head">
+            <div class="step-num">2</div>
+            <div><h2>Produtos</h2><span class="sub" id="produtosSub">Selecione um cliente primeiro para carregar a tabela de preço</span></div>
+          </div>
+          <input type="text" class="search" id="productFilter" placeholder="Filtrar por nome ou código (opcional)...">
+          <div class="results product-list" id="productList"></div>
+          <p class="hint">💡 O preço exibido já é o correspondente à tabela do cliente selecionado.</p>
+        </div>
+      </div>
+
+      <div class="ticket print-ticket" id="ticket">
+        <div class="ticket-head">
+          <h2>Resumo do Pedido</h2>
+          <div class="order-no" id="ticketOrderNo">—</div>
+        </div>
+        <div class="ticket-body" id="ticketBody">
+          <div class="ticket-empty">Selecione um cliente e adicione produtos para montar o pedido.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-bar" id="mobileBar">
+      <div><div class="mb-info" id="mbInfo">0 itens</div><div class="mb-total" id="mbTotal">R$ 0,00</div></div>
+      <button onclick="document.getElementById('ticket').scrollIntoView({behavior:'smooth'})">Ver pedido</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= MEUS PEDIDOS ======================= -->
+<div id="screenPedidos" class="hidden">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div style="cursor:pointer;" class="brand-mark" onclick="goHome()">←</div>
+        <div><h1>Meus Pedidos</h1><p>Histórico de pedidos enviados</p></div>
+      </div>
+      <div class="topbar-right"><button class="btn-logout" onclick="goHome()">Voltar</button></div>
+    </div>
+    <div class="filters-row">
+      <input type="text" id="pedidosFiltroTexto" placeholder="Buscar por cliente, código SAP ou nº do pedido...">
+      <select id="pedidosFiltroStatus"><option value="">Todos os status</option><option>Enviado</option></select>
+    </div>
+    <div class="order-list" id="pedidosList"></div>
+  </div>
+</div>
+
+<!-- ======================= ADMIN ======================= -->
+<div id="screenAdmin" class="hidden">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div style="cursor:pointer;" class="brand-mark" onclick="goHome()">←</div>
+        <div><h1>Administração</h1><p>Todos os pedidos, de todos os vendedores</p></div>
+      </div>
+      <div class="topbar-right"><button class="btn-logout" onclick="goHome()">Voltar</button></div>
+    </div>
+    <div class="filters-row">
+      <input type="text" id="adminFiltroTexto" placeholder="Buscar por cliente, código SAP ou nº do pedido...">
+      <select id="adminFiltroVendedor"><option value="">Todos os vendedores</option></select>
+      <button class="btn-secondary" onclick="exportarCsvAdmin()">⬇️ Exportar CSV</button>
+    </div>
+    <div class="order-list" id="adminList"></div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIGURAÇÃO — cole aqui a URL do seu Apps Script publicado como App da Web
+   ===================================================================== */
+const API_URL = 'https://script.google.com/macros/s/AKfycbwlbIXsBvvrVK_YFkNy-KZcgwBk0_4TMKoDAZdEfEAo9ugoH55ICfNNKLCxnLrfkTzX/exec';
+
+/* ============================= ESTADO ============================= */
+let state = {
+  user: null,          // {nome, perfil, carteira, login, senha}
+  clientes: [],
+  produtosCache: {},   // { GRI: [...], CPM: [...] }
+  selectedClient: null,
+  cart: {},
+  pedidos: [],
+  vendedores: []
+};
+
+function fmtMoney(v){ return (Number(v)||0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'}); }
+
+/* ============================= API ============================= */
+async function apiCall(action, params){
+  if(!API_URL || API_URL.indexOf('COLE_AQUI') === 0){
+    alert('O portal ainda não foi configurado: falta colar a URL do Apps Script no topo do arquivo (API_URL).');
+    throw new Error('API_URL não configurada');
+  }
+  const body = Object.assign({ action: action }, params || {});
+  if(state.user){ body.login = state.user.login; body.senha = state.user.senha; }
+  const url = API_URL + '?data=' + encodeURIComponent(JSON.stringify(body));
+  let resp;
+  try{
+    resp = await fetch(url, { method: 'GET' });
+  }catch(networkErr){
+    throw new Error('Não foi possível conectar ao servidor. Verifique sua internet e se a URL do Apps Script (API_URL) está correta e implantada como "Qualquer pessoa".');
+  }
+  const data = await resp.json();
+  if(!data.ok) throw new Error(data.error || 'Erro desconhecido');
+  return data;
+}
+
+/* ============================= SESSÃO ============================= */
+const SESSION_KEY = 'portalPedidos_sessao';
+
+function saveSession(){
+  try{ sessionStorage.setItem(SESSION_KEY, JSON.stringify(state.user)); }catch(e){}
+}
+function loadSession(){
+  try{
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function logout(){
+  state.user = null;
+  try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){}
+  showScreen('screenLogin');
+}
+
+/* ============================= NAVEGAÇÃO ============================= */
+function showScreen(id){
+  ['screenLogin','screenHome','screenPedido','screenPedidos','screenAdmin'].forEach(s=>{
+    document.getElementById(s).classList.toggle('hidden', s !== id);
+  });
+}
+
+function goHome(){ showScreen('screenHome'); }
+
+async function goToNovoPedido(){
+  state.selectedClient = null;
+  state.cart = {};
+  document.getElementById('pedidoVendedorLabel').textContent = state.user.nome;
+  document.getElementById('clientSearch').value = '';
+  document.getElementById('productFilter').value = '';
+  document.getElementById('clientResults').innerHTML = '';
+  document.getElementById('selectedClientBox').innerHTML = '';
+  document.getElementById('productList').innerHTML = '<div class="hint">Selecione um cliente para ver os produtos.</div>';
+  document.getElementById('produtosSub').textContent = 'Selecione um cliente primeiro para carregar a tabela de preço';
+  renderTicket();
+  showScreen('screenPedido');
+}
+
+async function goToMeusPedidos(){
+  showScreen('screenPedidos');
+  document.getElementById('pedidosList').innerHTML = '<div class="empty-state">Carregando pedidos...</div>';
+  try{
+    const data = await apiCall('getPedidos', {});
+    state.pedidos = data.pedidos;
+    renderPedidosList();
+  }catch(e){
+    document.getElementById('pedidosList').innerHTML = '<div class="empty-state">Erro ao carregar: '+e.message+'</div>';
+  }
+}
+
+async function goToAdmin(){
+  showScreen('screenAdmin');
+  document.getElementById('adminList').innerHTML = '<div class="empty-state">Carregando...</div>';
+  try{
+    const [pedidosData, vendData] = await Promise.all([
+      apiCall('getPedidos', {}),
+      apiCall('getVendedores', {})
+    ]);
+    state.pedidos = pedidosData.pedidos;
+    state.vendedores = vendData.vendedores;
+    const sel = document.getElementById('adminFiltroVendedor');
+    sel.innerHTML = '<option value="">Todos os vendedores</option>' +
+      state.vendedores.filter(v=>String(v.perfil).toLowerCase().indexOf('admin') !== 0).map(v=>`<option value="${v.nome}">${v.nome}</option>`).join('');
+    renderAdminList();
+  }catch(e){
+    document.getElementById('adminList').innerHTML = '<div class="empty-state">Erro ao carregar: '+e.message+'</div>';
+  }
+}
+
+/* ============================= LOGIN ============================= */
+document.getElementById('btnLogin').addEventListener('click', doLogin);
+document.getElementById('loginPass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+async function doLogin(){
+  const login = document.getElementById('loginUser').value.trim();
+  const senha = document.getElementById('loginPass').value;
+  const errBox = document.getElementById('loginError');
+  errBox.textContent = '';
+  if(!login || !senha){ errBox.textContent = 'Preencha login e senha.'; return; }
+
+  const btn = document.getElementById('btnLogin');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  try{
+    const tempUser = { login, senha };
+    state.user = tempUser;
+    const data = await apiCall('login', {});
+    state.user = { login, senha, nome: data.nome, perfil: data.perfil, carteira: data.carteira };
+    saveSession();
+    await afterLogin();
+  }catch(e){
+    state.user = null;
+    errBox.textContent = e.message || 'Não foi possível entrar.';
+  }finally{
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+async function afterLogin(){
+  document.getElementById('homeUserName').textContent = state.user.nome;
+  document.getElementById('homeGreeting').textContent = 'Olá, ' + state.user.nome;
+  document.getElementById('cardAdmin').style.display = String(state.user.perfil||'').toLowerCase().indexOf('admin') === 0 ? '' : 'none';
+  showScreen('screenHome');
+  try{
+    const data = await apiCall('getClientes', {});
+    state.clientes = data.clientes;
+  }catch(e){
+    alert('Não foi possível carregar sua carteira de clientes: ' + e.message);
+  }
+}
+
+(async function tryRestoreSession(){
+  const saved = loadSession();
+  if(saved){
+    state.user = saved;
+    try{ await afterLogin(); }catch(e){ logout(); }
+  }
+})();
+
+/* ============================= CLIENTES (Novo Pedido) ============================= */
+const clientSearch = document.getElementById('clientSearch');
+const clientResults = document.getElementById('clientResults');
+
+clientSearch.addEventListener('input', e => renderClientResults(e.target.value));
+
+function renderClientResults(query){
+  clientResults.innerHTML = '';
+  if(!query || query.length < 1) return;
+  const q = query.toLowerCase();
+  const matches = state.clientes.filter(c =>
+    (c.nome||'').toLowerCase().includes(q) ||
+    (c.fantasia||'').toLowerCase().includes(q) ||
+    (c.sap||'').toLowerCase().includes(q) ||
+    (c.cnpj||'').toLowerCase().includes(q) ||
+    (c.cidade||'').toLowerCase().includes(q)
+  ).slice(0, 8);
+
+  if(matches.length === 0){
+    clientResults.innerHTML = '<div class="hint">Nenhum cliente encontrado na sua carteira.</div>';
+    return;
+  }
+  matches.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'client-card';
+    div.innerHTML = `
+      <div>
+        <div class="ci-name">${c.fantasia || c.nome}${c.fantasia ? ' — ' + c.nome : ''}</div>
+        <div class="ci-detail">SAP ${c.sap} · ${c.cnpj || 's/ CNPJ'} · ${c.cidade || ''}</div>
+      </div>
+      <span class="chip chip-tabela">${c.tabela}</span>
+    `;
+    div.onclick = () => selectClient(c);
+    clientResults.appendChild(div);
+  });
+}
+
+async function selectClient(c){
+  state.selectedClient = c;
+  state.cart = {};
+  clientSearch.value = '';
+  clientResults.innerHTML = '';
+  renderSelectedClient();
+  document.getElementById('produtosSub').textContent = 'Tabela de preço: ' + c.tabela + ' (carregada automaticamente)';
+  document.getElementById('productList').innerHTML = '<div class="hint">Carregando produtos...</div>';
+  await loadProdutos(c.tabela);
+  renderProductList('');
+  renderTicket();
+}
+
+function renderSelectedClient(){
+  const box = document.getElementById('selectedClientBox');
+  const c = state.selectedClient;
+  if(!c){ box.innerHTML=''; return; }
+  box.innerHTML = `
+    <div class="selected-client-box">
+      <div>
+        <div class="ci-name">${c.fantasia || c.nome}${c.fantasia ? ' — ' + c.nome : ''}</div>
+        <div class="ci-detail">SAP ${c.sap} · ${c.cnpj || 's/ CNPJ'} · ${c.cidade || ''}${c.condPagamento ? ' · Prazo: ' + c.condPagamento : ''}</div>
+      </div>
+      <button class="btn-mini ghost" onclick="clearClient()">Trocar</button>
+    </div>
+  `;
+}
+
+function clearClient(){
+  state.selectedClient = null;
+  state.cart = {};
+  renderSelectedClient();
+  document.getElementById('productList').innerHTML = '<div class="hint">Selecione um cliente para ver os produtos.</div>';
+  document.getElementById('produtosSub').textContent = 'Selecione um cliente primeiro para carregar a tabela de preço';
+  renderTicket();
+}
+
+/* ============================= PRODUTOS ============================= */
+async function loadProdutos(tabela){
+  if(state.produtosCache[tabela]){ return state.produtosCache[tabela]; }
+  const data = await apiCall('getProdutos', { tabela });
+  state.produtosCache[tabela] = data.produtos;
+  return data.produtos;
+}
+
+const productFilter = document.getElementById('productFilter');
+productFilter.addEventListener('input', e => renderProductList(e.target.value));
+
+function renderProductList(query){
+  const productList = document.getElementById('productList');
+  productList.innerHTML = '';
+  if(!state.selectedClient){ productList.innerHTML = '<div class="hint">Selecione um cliente para ver os produtos.</div>'; return; }
+  const produtos = state.produtosCache[state.selectedClient.tabela] || [];
+  const q = (query || '').toLowerCase().trim();
+  const items = produtos.filter(p => !q || p.descricao.toLowerCase().includes(q) || String(p.codigo).includes(q) || String(p.ean).includes(q));
+
+  if(items.length === 0){ productList.innerHTML = '<div class="hint">Nenhum produto encontrado.</div>'; return; }
+
+  items.forEach(p => {
+    const inCart = !!state.cart[p.codigo];
+    const qty = inCart ? state.cart[p.codigo].qty : 1;
+    const statusOk = p.status === 'OK';
+
+    const row = document.createElement('div');
+    row.className = 'product-row' + (inCart ? ' checked' : '');
+    row.innerHTML = `
+      <input type="checkbox" ${inCart ? 'checked' : ''}>
+      <div class="pr-info">
+        <div class="pr-desc">${p.descricao}</div>
+        <div class="pr-meta">
+          <span>Cód. ${p.codigo}</span>
+          <span class="pr-price">${fmtMoney(p.custo)}</span>
+          ${statusOk ? '' : `<span class="badge-warn">● ${p.status}</span>`}
+        </div>
+      </div>
+      <div class="pr-qty">
+        <span style="font-size:11px; color:var(--ink-soft);">Qtd.</span>
+        <input type="number" min="1" value="${qty}">
+      </div>
+    `;
+    const checkbox = row.querySelector('input[type=checkbox]');
+    const qtyInput = row.querySelector('input[type=number]');
+
+    checkbox.addEventListener('change', () => {
+      if(checkbox.checked){
+        const v = Math.max(1, parseInt(qtyInput.value) || 1);
+        state.cart[p.codigo] = { produto: p, qty: v };
+      } else {
+        delete state.cart[p.codigo];
+      }
+      renderProductList(productFilter.value);
+      renderTicket();
+    });
+    qtyInput.addEventListener('input', () => {
+      const v = Math.max(1, parseInt(qtyInput.value) || 1);
+      checkbox.checked = true;
+      state.cart[p.codigo] = { produto: p, qty: v };
+      row.classList.add('checked');
+      renderTicket();
+    });
+    productList.appendChild(row);
+  });
+}
+
+function removeItem(codigo){ delete state.cart[codigo]; renderProductList(productFilter.value); renderTicket(); }
+function changeQty(codigo, delta){
+  if(!state.cart[codigo]) return;
+  state.cart[codigo].qty += delta;
+  if(state.cart[codigo].qty <= 0){ delete state.cart[codigo]; }
+  renderProductList(productFilter.value);
+  renderTicket();
+}
+
+/* ============================= TICKET / CONFIRMAÇÃO ============================= */
+function renderTicket(){
+  const body = document.getElementById('ticketBody');
+  const items = Object.values(state.cart);
+  const c = state.selectedClient;
+
+  if(!c && items.length === 0){
+    body.innerHTML = '<div class="ticket-empty">Selecione um cliente e adicione produtos para montar o pedido.</div>';
+    updateMobileBar(0,0);
+    return;
+  }
+
+  let html = '';
+  if(c){
+    html += `<div class="ticket-client"><b>${c.fantasia || c.nome}</b><br>SAP ${c.sap} · ${c.cidade || ''} · Tabela ${c.tabela}</div>`;
+  } else {
+    html += `<div class="ticket-client" style="color:var(--warn);">⚠ Nenhum cliente selecionado ainda</div>`;
+  }
+
+  let total = 0;
+  if(items.length === 0){
+    html += '<div class="ticket-empty">Nenhum produto adicionado ainda.</div>';
+  } else {
+    items.forEach(({produto, qty}) => {
+      const subtotal = produto.custo * qty;
+      total += subtotal;
+      html += `
+        <div class="item-row">
+          <div class="item-left">
+            <div class="it-name">${produto.descricao}</div>
+            <div class="it-code">Cód. ${produto.codigo} · ${fmtMoney(produto.custo)}</div>
+            <div class="qty-controls">
+              <span style="font-size:11px;color:var(--ink-soft);margin-right:2px;">Qtd.</span>
+              <button onclick="changeQty(${produto.codigo}, -1)">−</button>
+              <span>${qty}</span>
+              <button onclick="changeQty(${produto.codigo}, 1)">+</button>
+            </div>
+          </div>
+          <div class="item-right">
+            <div class="it-subtotal">${fmtMoney(subtotal)}</div>
+            <button class="remove-x" onclick="removeItem(${produto.codigo})">remover</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  html += `
+    <div class="ticket-total"><span class="lbl">Total</span><span class="val">${fmtMoney(total)}</span></div>
+    <textarea class="obs" id="obsField" placeholder="Observações (opcional)...">${window.__obs || ''}</textarea>
+    <div class="confirm-box" id="confirmBox"></div>
+    <div class="copied-msg" id="copiedMsg"></div>
+  `;
+
+  body.innerHTML = html;
+  document.getElementById('obsField').addEventListener('input', e => window.__obs = e.target.value);
+  renderConfirmBox();
+  updateMobileBar(items.reduce((s,i)=>s+i.qty,0), total);
+}
+
+function renderConfirmBox(){
+  const box = document.getElementById('confirmBox');
+  const items = Object.values(state.cart);
+  if(!box) return;
+  if(!state.selectedClient || items.length === 0){
+    box.innerHTML = '<p>Selecione o cliente e ao menos um produto para confirmar o pedido.</p>';
+    return;
+  }
+  box.innerHTML = `
+    <p><b>Confira os dados do cliente, produtos e valores antes de enviar.</b></p>
+    <div class="row">
+      <button class="btn-primary" style="flex:1;" onclick="confirmarPedido()">✓ Confirmar pedido</button>
+    </div>
+  `;
+}
+
+async function confirmarPedido(){
+  const items = Object.values(state.cart);
+  const c = state.selectedClient;
+  if(!c || items.length === 0) return;
+
+  const box = document.getElementById('confirmBox');
+  box.innerHTML = '<p>Enviando pedido...</p>';
+
+  try{
+    const payload = {
+      cliente: c,
+      itens: items.map(({produto, qty}) => ({ codigo: produto.codigo, descricao: produto.descricao, quantidade: qty, preco: produto.custo })),
+      observacao: (window.__obs || '').trim()
+    };
+    const data = await apiCall('criarPedido', payload);
+    mostrarPedidoConfirmado(data.pedidoId, data.total);
+  }catch(e){
+    box.innerHTML = `<p style="color:var(--warn);">Erro ao enviar: ${e.message}</p><button class="btn-secondary" onclick="renderConfirmBox()">Tentar novamente</button>`;
+  }
+}
+
+function mostrarPedidoConfirmado(pedidoId, total){
+  document.getElementById('ticketOrderNo').textContent = 'Nº ' + pedidoId;
+  window.__lastPedidoId = pedidoId;
+  const box = document.getElementById('confirmBox');
+  box.innerHTML = `
+    <p style="color:var(--ok); font-weight:600;">✓ Pedido ${pedidoId} enviado e registrado!</p>
+    <div class="send-row">
+      <button class="btn-send whatsapp" onclick="sendWhatsApp()"><span>📱</span> WhatsApp</button>
+      <button class="btn-send email" onclick="sendEmail()"><span>✉️</span> E-mail</button>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <button class="btn-secondary" style="flex:1;" onclick="copyOrder()">📋 Copiar pedido</button>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <button class="btn-secondary" style="flex:1;" onclick="goToNovoPedido()">Novo pedido</button>
+    </div>
+  `;
+}
+
+function buildOrderText(){
+  const items = Object.values(state.cart);
+  const c = state.selectedClient;
+  let txt = `*PEDIDO DE COMPRA*\n`;
+  txt += `Pedido: ${window.__lastPedidoId || ''}\n`;
+  txt += `Representante: ${state.user.nome}\n\n`;
+  if(c){
+    txt += `*Cliente:* ${c.fantasia || c.nome}\n`;
+    txt += `SAP: ${c.sap} | CNPJ: ${c.cnpj} | ${c.cidade}\n`;
+    txt += `Tabela: ${c.tabela}${c.condPagamento ? ' | Prazo: ' + c.condPagamento : ''}\n\n`;
+  }
+  txt += `*Itens:*\n`;
+  let total = 0;
+  items.forEach(({produto, qty}, i) => {
+    const subtotal = produto.custo * qty;
+    total += subtotal;
+    txt += `${i+1}. [${produto.codigo}] ${produto.descricao}\n    ${fmtMoney(produto.custo)} x ${qty} = ${fmtMoney(subtotal)}\n`;
+  });
+  txt += `\n*Total: ${fmtMoney(total)}*\n`;
+  const obs = (window.__obs || '').trim();
+  if(obs) txt += `\nObs: ${obs}\n`;
+  return txt;
+}
+
+function sendWhatsApp(){ window.open(`https://wa.me/?text=${encodeURIComponent(buildOrderText())}`, '_blank'); }
+function sendEmail(){
+  const subject = `Pedido de Compra ${window.__lastPedidoId || ''}`;
+  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(buildOrderText())}`;
+}
+function copyOrder(){
+  const txt = buildOrderText();
+  const msg = document.getElementById('copiedMsg');
+  const done = () => { if(msg){ msg.textContent = '✓ Pedido copiado!'; setTimeout(()=>msg.textContent='', 4000); } };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt, done));
+  } else { fallbackCopy(txt, done); }
+}
+function fallbackCopy(txt, done){
+  const ta = document.createElement('textarea');
+  ta.value = txt; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); done(); }catch(e){}
+  document.body.removeChild(ta);
+}
+
+function updateMobileBar(itemCount, total){
+  document.getElementById('mbInfo').textContent = itemCount + (itemCount === 1 ? ' item' : ' itens');
+  document.getElementById('mbTotal').textContent = fmtMoney(total);
+}
+
+/* ============================= MEUS PEDIDOS ============================= */
+document.getElementById('pedidosFiltroTexto').addEventListener('input', renderPedidosList);
+document.getElementById('pedidosFiltroStatus').addEventListener('change', renderPedidosList);
+
+function renderPedidosList(){
+  const texto = document.getElementById('pedidosFiltroTexto').value.toLowerCase().trim();
+  const status = document.getElementById('pedidosFiltroStatus').value;
+  const list = document.getElementById('pedidosList');
+  let items = state.pedidos.filter(p =>
+    (!texto || (p.clienteNome||'').toLowerCase().includes(texto) || (p.clienteSap||'').toLowerCase().includes(texto) || String(p.pedidoId).toLowerCase().includes(texto)) &&
+    (!status || p.status === status)
+  );
+  if(items.length === 0){ list.innerHTML = '<div class="empty-state">Nenhum pedido encontrado.</div>'; return; }
+  list.innerHTML = items.map(p => orderCardHtml(p, false)).join('');
+  items.forEach(p => {
+    document.getElementById('card-'+p.pedidoId).addEventListener('click', () => toggleOrderDetail(p.pedidoId));
+  });
+}
+
+function toggleOrderDetail(pedidoId){
+  const el = document.getElementById('detail-'+pedidoId);
+  if(el) el.classList.toggle('open');
+}
+
+function orderCardHtml(p, showVendedor){
+  const data = p.dataHora ? new Date(p.dataHora).toLocaleString('pt-BR') : '';
+  return `
+    <div class="order-card" id="card-${p.pedidoId}">
+      <div class="order-card-top">
+        <span class="order-id">${p.pedidoId}</span>
+        <span class="order-status">${p.status || 'Enviado'}</span>
+      </div>
+      <div class="order-meta">${data}${showVendedor ? ' · ' + p.vendedor : ''}</div>
+      <div class="order-meta">${p.clienteNome || ''}${p.clienteSap ? ' · SAP ' + p.clienteSap : ''}</div>
+      <div class="order-total">${fmtMoney(p.valorTotal)}</div>
+      <div class="order-detail" id="detail-${p.pedidoId}">
+        ${(p.itens||[]).map(it => `<div class="item-row"><div class="item-left"><div class="it-name">${it.descricao}</div><div class="it-code">Cód. ${it.codigo} · Qtd ${it.quantidade}</div></div><div class="item-right"><div class="it-subtotal">${fmtMoney(it.subtotal)}</div></div></div>`).join('')}
+        ${p.observacao ? `<p class="hint">Obs: ${p.observacao}</p>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+/* ============================= ADMIN ============================= */
+document.getElementById('adminFiltroTexto').addEventListener('input', renderAdminList);
+document.getElementById('adminFiltroVendedor').addEventListener('change', renderAdminList);
+
+function renderAdminList(){
+  const texto = document.getElementById('adminFiltroTexto').value.toLowerCase().trim();
+  const vendedor = document.getElementById('adminFiltroVendedor').value;
+  const list = document.getElementById('adminList');
+  let items = state.pedidos.filter(p =>
+    (!texto || (p.clienteNome||'').toLowerCase().includes(texto) || (p.clienteSap||'').toLowerCase().includes(texto) || String(p.pedidoId).toLowerCase().includes(texto)) &&
+    (!vendedor || p.vendedor === vendedor)
+  );
+  if(items.length === 0){ list.innerHTML = '<div class="empty-state">Nenhum pedido encontrado.</div>'; return; }
+  list.innerHTML = items.map(p => orderCardHtml(p, true)).join('');
+  items.forEach(p => {
+    document.getElementById('card-'+p.pedidoId).addEventListener('click', () => toggleOrderDetail(p.pedidoId));
+  });
+}
+
+function exportarCsvAdmin(){
+  const rows = [['Pedido','Data','Vendedor','Cliente','SAP','Total','Status']];
+  state.pedidos.forEach(p => {
+    rows.push([p.pedidoId, p.dataHora, p.vendedor, p.clienteNome, p.clienteSap, p.valorTotal, p.status]);
+  });
+  const csv = rows.map(r => r.map(v => `"${String(v==null?'':v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'pedidos.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
